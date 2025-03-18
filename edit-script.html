@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>红色剧本杀 - 编辑剧本</title>
+  <style>
+    :root {
+      --primary-color: #e60000;
+      --primary-dark: #c50000;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background-color: #f7f7f7;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .page-title {
+      font-size: 24px;
+      color: var(--primary-color);
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .button {
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .button i {
+      margin-right: 5px;
+      font-size: 16px;
+    }
+    .button:hover {
+      background-color: var(--primary-dark);
+    }
+    .button.secondary {
+      background-color: #f0f0f0;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .button.secondary:hover {
+      background-color: #e0e0e0;
+    }
+    .edit-form {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .form-section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .required:after {
+      content: " *";
+      color: var(--primary-color);
+    }
+    .upload-container {
+      display: flex;
+      gap: 20px;
+    }
+    .image-preview {
+      width: 200px;
+      height: 113px;
+      background-color: #f0f0f0;
+      border: 1px dashed #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .upload-instructions {
+      flex: 1;
+    }
+    .upload-hint {
+      color: #999;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .sub-section {
+      background-color: var(--light-gray);
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .sub-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .sub-section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    .remove-btn {
+      background-color: transparent;
+      border: none;
+      color: #999;
+      font-size: 18px;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .remove-btn:hover {
+      color: var(--primary-color);
+    }
+    .character-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #eee;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .character-row {
+      display: flex;
+      gap: 15px;
+    }
+    .character-col {
+      flex: 1;
+    }
+    .question-options {
+      margin-top: 10px;
+    }
+    .option-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .option-input {
+      flex: 1;
+    }
+    .option-radio {
+      margin-right: 10px;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+    .status-bar.show {
+      transform: translateY(0);
+    }
+    .success {
+      color: #4caf50;
+    }
+    .error {
+      color: #f44336;
+    }
+    .progress-bar {
+      height: 4px;
+      background-color: var(--primary-color);
+      width: 0%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: width 0.3s;
+    }
+    .toggle-section {
+      font-size: 13px;
+      color: #0066cc;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-section i {
+      font-size: 18px;
+      margin-left: 5px;
+    }
+    .collapsed {
+      display: none;
+    }
+    /* 添加图标字体 */
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/materialicons/v139/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+    }
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="page-title" id="pageTitle">添加新剧本</h1>
+      <div class="nav-buttons">
+        <button class="button secondary" id="backButton">
+          <i class="material-icons">arrow_back</i> 返回列表
+        </button>
+      </div>
+    </div>
+
+    <form id="scriptForm" class="edit-form">
+      <input type="hidden" id="scriptId" value="">
+      
+      <!-- 基本信息部分 -->
+      <div class="form-section">
+        <div class="section-title">基本信息</div>
+        
+        <div class="form-group">
+          <label class="form-label required" for="title">剧本标题</label>
+          <input type="text" id="title" class="form-input" required placeholder="请输入剧本标题">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="category">剧本分类</label>
+          <select id="category" class="form-select">
+            <option value="历史推理">历史推理</option>
+            <option value="革命故事">革命故事</option>
+            <option value="战争策略">战争策略</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="description">剧本简介</label>
+          <textarea id="description" class="form-textarea" placeholder="请输入剧本简介"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="historical_background">历史背景</label>
+          <textarea id="historical_background" class="form-textarea" placeholder="请输入历史背景介绍"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">剧本封面</label>
+          <div class="upload-container">
+            <div class="image-preview">
+              <img src="https://via.placeholder.com/200x113?text=上传封面" id="coverPreview">
+            </div>
+            <div class="upload-instructions">
+              <input type="file" id="coverUpload" accept="image/*" style="display:none">
+              <button type="button" class="button secondary" id="coverUploadBtn">
+                <i class="material-icons">cloud_upload</i> 上传图片
+              </button>
+              <div class="upload-hint">支持JPG、PNG格式，建议尺寸750x422像素</div>
+            </div>
+          </div>
+          <input type="hidden" id="coverImageUrl" value="">
+        </div>
+      </div>
+      
+      <!-- 角色信息部分 -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>角色信息</span>
+          <button type="button" class="button secondary" id="addCharacterBtn">
+            <i class="material-icons">person_add</i> 添加角色
+          </button>
+        </div>
+        <div id="charactersContainer">
+          <!-- 角色信息将通过JavaScript动态添加 -->
+        </div>
+      </div>
+      
+      <!-- 场景内容部分 -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>场景内容</span>
+          <button type="button" class="button secondary" id="addSceneBtn">
+            <i class="material-icons">add</i> 添加场景
+          </button>
+        </div>
+        <div id="scenesContainer">
+          <!-- 场景内容将通过JavaScript动态添加 -->
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="button secondary" id="cancelBtn">取消</button>
+        <button type="submit" class="button" id="saveBtn">保存剧本</button>
+      </div>
+    </form>
+    
+    <div class="status-bar" id="statusBar">
+      <div class="progress-bar" id="progressBar"></div>
+      <span id="statusText"></span>
+    </div>
+  </div>
+
+  <script>
+    // 检查登录状态
+    function checkLogin() {
+      const sessionData = localStorage.getItem('adminSession');
+      if (!sessionData) {
+        window.location.href = 'index.html';
+        return false;
+      }
+      
+      try {
+        const session = JSON.parse(sessionData);
+        const currentTime = new Date().getTime();
+        
+        if (currentTime - session.loginTime > 24 * 60 * 60 * 1000) {
+          localStorage.removeItem('adminSession');
+          window.location.href = 'index.html';
+          return false;
+        }
+        
+        return true;
+      } catch (e) {
+        localStorage.removeItem('adminSession');
+        window.location.href = 'index.html';
+        return false;
+      }
+    }
+    
+    // 显示状态消息
+    function showStatus(message, isError = false) {
+      const statusBar = document.getElementById('statusBar');
+      const statusText = document.getElementById('statusText');
+      
+      statusText.textContent = message;
+      statusText.className = isError ? 'error' : 'success';
+      statusBar.classList.add('show');
+      
+      setTimeout(() => {
+        statusBar.classList.remove('show');
+      }, 3000);
+    }
+    
+    // 显示进度条
+    function showProgress(percent) {
+      document.getElementById('progressBar').style.width = percent + '%';
+    }
+    
+    // 添加角色
+    function addCharacter(character = {}) {
+      const container = document.getElementById('charactersContainer');
+      const characterCount = container.children.length;
+      
+      const characterDiv = document.createElement('div');
+      characterDiv.className = 'sub-section character-section';
+      characterDiv.innerHTML = `
+        <button type="button" class="remove-btn" onclick="removeCharacter(this)">×</button>
+        <div class="sub-section-header">
+          <h3 class="sub-section-title">角色 #${characterCount + 1}</h3>
+        </div>
+        
+        <div class="character-row">
+          <div class="character-col">
+            <div class="form-group">
+              <label class="form-label required">角色名称</label>
+              <input type="text" class="form-input character-name" value="${character.name || ''}" placeholder="角色名称" required>
+            </div>
+          </div>
+          <div style="width: 80px; text-align: center;">
+            <input type="file" class="character-avatar-upload" style="display:none" accept="image/*">
+            <img src="${character.avatar || 'https://via.placeholder.com/60x60?text=头像'}" class="character-avatar" onclick="uploadCharacterAvatar(this)">
+            <input type="hidden" class="character-avatar-url" value="${character.avatar || ''}">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">角色描述</label>
+          <textarea class="form-textarea character-description" placeholder="请输入角色描述">${character.description || ''}</textarea>
+        </div>
+      `;
+      
+      container.appendChild(characterDiv);
+    }
+    
+    // 移除角色
+    function removeCharacter(button) {
+      const section = button.closest('.character-section');
+      if (document.querySelectorAll('.character-section').length > 1) {
+        section.remove();
+        renumberCharacters();
+      } else {
+        showStatus('至少需要保留一个角色', true);
+      }
+    }
+    
+    // 重新编号角色
+    function renumberCharacters() {
+      const characters = document.querySelectorAll('.character-section');
+      characters.forEach((character, index) => {
+        character.querySelector('.sub-section-title').textContent = `角色 #${index + 1}`;
+      });
+    }
+    
+    // 上传角色头像
+    function uploadCharacterAvatar(imgElement) {
+      const fileInput = imgElement.closest('.character-col, .sub-section').querySelector('.character-avatar-upload');
+      fileInput.click();
+      
+      fileInput.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          // 这里应该实现真正的上传功能，连接到云存储
+          // 为了演示，我们使用本地FileReader预览
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            imgElement.src = e.target.result;
+            imgElement.closest('.character-col, .sub-section').querySelector('.character-avatar-url').value = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+    }
+    
+    // 添加场景
+    function addScene(scene = {}) {
+      const container = document.getElementById('scenesContainer');
+      const sceneCount = container.children.length;
+      const sceneId = scene.sceneId || (sceneCount + 1);
+      
+      const sceneDiv = document.createElement('div');
+      sceneDiv.className = 'sub-section scene-section';
+      sceneDiv.innerHTML = `
+        <button type="button" class="remove-btn" onclick="removeScene(this)">×</button>
+        <div class="sub-section-header">
+          <h3 class="sub-section-title">场景 #${sceneId}</h3>
+          <span class="toggle-section" onclick="toggleSceneContent(this)">
+            ${sceneCount === 0 ? '收起' : '展开'} <i class="material-icons">${sceneCount === 0 ? 'expand_less' : 'expand_more'}</i>
+          </span>
+        </div>
+        
+        <div class="scene-content ${sceneCount === 0 ? '' : 'collapsed'}">
+          <input type="hidden" class="scene-id" value="${sceneId}">
+          
+          <div class="form-group">
+            <label class="form-label required">场景内容</label>
+            <textarea class="form-textarea scene-content-text" placeholder="请输入场景内容描述" required rows="6">${scene.content || ''}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">提示信息</label>
+            <input type="text" class="form-input scene-tips" placeholder="当玩家遇到困难时可查看的提示" value="${scene.tips || ''}">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">情境问题</label>
+            <input type="text" class="form-input scene-question-text" placeholder="问题描述" value="${scene.question?.text || ''}">
+            
+            <div class="question-options">
+              <div class="form-group">
+                <label class="form-label">选项</label>
+                <div class="option-row">
+                  <input type="radio" name="correct_${sceneId}" class="option-radio" value="0" ${(!scene.question?.correctIndex || scene.question?.correctIndex === 0) ? 'checked' : ''}>
+                  <input type="text" class="form-input option-input" placeholder="选项A" value="${scene.question?.options?.[0] || ''}">
+                </div>
+                <div class="option-row">
+                  <input type="radio" name="correct_${sceneId}" class="option-radio" value="1" ${scene.question?.correctIndex === 1 ? 'checked' : ''}>
+                  <input type="text" class="form-input option-input" placeholder="选项B" value="${scene.question?.options?.[1] || ''}">
+                </div>
+                <div class="option-row">
+                  <input type="radio" name="correct_${sceneId}" class="option-radio" value="2" ${scene.question?.correctIndex === 2 ? 'checked' : ''}>
+                  <input type="text" class="form-input option-input" placeholder="选项C" value="${scene.question?.options?.[2] || ''}">
+                </div>
+                <div class="option-row">
+                  <input type="radio" name="correct_${sceneId}" class="option-radio" value="3" ${scene.question?.correctIndex === 3 ? 'checked' : ''}>
+                  <input type="text" class="form-input option-input" placeholder="选项D" value="${scene.question?.options?.[3] || ''}">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">答案解释</label>
+                <textarea class="form-textarea scene-explanation" placeholder="选择正确答案后的解释文字">${scene.question?.explanation || ''}</textarea>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">关联线索标题</label>
+                <input type="text" class="form-input scene-clue-title" placeholder="回答正确后获得的线索标题" value="${scene.question?.clueTitle || ''}">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">关联线索描述</label>
+                <textarea class="form-textarea scene-clue-description" placeholder="回答正确后获得的线索描述">${scene.question?.clueDescription || ''}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(sceneDiv);
+    }
+    
+    // 移除场景
+    function removeScene(button) {
+      const section = button.closest('.scene-section');
+      if (document.querySelectorAll('.scene-section').length > 1) {
+        section.remove();
+        renumberScenes();
+      } else {
+        showStatus('至少需要保留一个场景', true);
+      }
+    }
+    
+    // 重新编号场景
+    function renumberScenes() {
+      const scenes = document.querySelectorAll('.scene-section');
+      scenes.forEach((scene, index) => {
+        const sceneId = index + 1;
+        scene.querySelector('.sub-section-title').textContent = `场景 #${sceneId}`;
+        scene.querySelector('.scene-id').value = sceneId;
+        
+        // 更新选项radio name
+        const radios = scene.querySelectorAll('.option-radio');
+        radios.forEach(radio => {
+          radio.name = `correct_${sceneId}`;
+        });
+      });
+    }
+    
+    // 切换场景内容显示/隐藏
+    function toggleSceneContent(element) {
+      const sceneContent = element.closest('.sub-section').querySelector('.scene-content');
+      const icon = element.querySelector('i');
+      
+      if (sceneContent.classList.contains('collapsed')) {
+        sceneContent.classList.remove('collapsed');
+        element.innerHTML = `收起 <i class="material-icons">expand_less</i>`;
+      } else {
+        sceneContent.classList.add('collapsed');
+        element.innerHTML = `展开 <i class="material-icons">expand_more</i>`;
+      }
+    }
+    
+    // 上传封面图片
+    function uploadCoverImage() {
+      const fileInput = document.getElementById('coverUpload');
+      fileInput.click();
+      
+      fileInput.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          // 这里应该实现真正的上传功能，连接到云存储
+          // 为了演示，我们使用本地FileReader预览
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            document.getElementById('coverPreview').src = e.target.result;
+            document.getElementById('coverImageUrl').value = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+    }
+    
+    // 收集表单数据
+    function collectFormData() {
+      // 收集基本信息
+      const data = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+        historical_background: document.getElementById('historical_background').value,
+        image: document.getElementById('coverImageUrl').value,
+        players: 5, // 默认值
+        difficulty: "中等", // 默认值
+        duration: "2小时", // 默认值
+        tags: ["历史", "解谜"] // 默认标签
+      };
+      
+      // 收集角色信息
+      data.characters = [];
+      document.querySelectorAll('.character-section').forEach(section => {
+        data.characters.push({
+          name: section.querySelector('.character-name').value,
+          description: section.querySelector('.character-description').value,
+          avatar: section.querySelector('.character-avatar-url').value
+        });
+      });
+      
+      // 收集场景信息
+      data.scenes = [];
+      document.querySelectorAll('.scene-section').forEach(section => {
+        const sceneId = parseInt(section.querySelector('.scene-id').value);
+        const correctRadio = section.querySelector('input[type="radio"]:checked');
+        const correctIndex = correctRadio ? parseInt(correctRadio.value) : 0;
+        
+        const options = [];
+        section.querySelectorAll('.option-input').forEach(input => {
+          options.push(input.value);
+        });
+        
+        data.scenes.push({
+          sceneId: sceneId,
+          content: section.querySelector('.scene-content-text').value,
+          tips: section.querySelector('.scene-tips').value,
+          question: {
+            text: section.querySelector('.scene-question-text').value,
+            options: options,
+            correctIndex: correctIndex,
+            explanation: section.querySelector('.scene-explanation').value,
+            clueTitle: section.querySelector('.scene-clue-title').value,
+            clueDescription: section.querySelector('.scene-clue-description').value
+          }
+        });
+      });
+      
+      return data;
+    }
+    
+    // 加载剧本数据
+    async function loadScriptData(scriptId) {
+      // 显示加载中状态
+      showStatus('正在加载剧本数据...');
+      showProgress(30);
+      
+      try {
+        // 这里应该调用云函数获取剧本数据
+        // 为了演示，我们使用模拟数据
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 模拟API响应
+        const response = {
+          success: true,
+          data: {
+            _id: scriptId,
+            title: '长征密令',
+            description: '红军长征途中的一封关键密令突然失踪，大家必须在天亮前找到密令和叛徒。',
+            category: '历史推理',
+            historical_background: '1935年，中央红军实施战略转移，开始两万五千里长征...',
+            image: 'https://via.placeholder.com/300x160?text=长征密令',
+            characters: [
+              {
+                name: '李政委',
+                description: '红军政委，沉着冷静',
+                avatar: 'https://via.placeholder.com/60x60?text=李政委'
+              },
+              {
+                name: '张参谋',
+                description: '年轻的参谋，聪明过人',
+                avatar: 'https://via.placeholder.com/60x60?text=张参谋'
+              }
+            ],
+            scenes: [
+              {
+                sceneId: 1,
+                content: "第一幕：1936年，红军长征途中的某个傍晚，总部发出的一封关键密令突然失踪。这封密令关系到红军能否安全渡过金沙江。大家必须在天亮前找到密令和叛徒。",
+                tips: "注意观察每个人的行为和话语中的矛盾之处",
+                question: {
+                  text: "根据当时的情况，红军最应该采取哪种策略？",
+                  options: ["立即强攻", "分散部队", "秘密渡河", "等待增援"],
+                  correctIndex: 2,
+                  explanation: "当时红军面临的最佳选择是秘密渡河，避免敌人发现。",
+                  clueTitle: "渡河路线图",
+                  clueDescription: "这张图显示了红军当时的秘密渡河路线，是重要的战略资料。"
+                }
+              },
+              {
+                sceneId: 2,
+                content: "第二幕：经过一番调查，大家发现密令可能被藏在了营地的几个关键位置之一。同时，一些线索也逐渐指向了几名可疑人员。",
+                tips: "关注可疑人员的活动范围",
+                question: {
+                  text: "下列哪项不是判断叛徒的有效线索？",
+                  options: ["夜间活动记录", "个人背景", "对敌态度", "说话口音"],
+                  correctIndex: 3,
+                  explanation: "当时红军队伍来自全国各地，口音多样，不是判断叛徒的可靠依据。",
+                  clueTitle: "作战地图",
+                  clueDescription: "在嫌疑人物品中发现的标记了敌军位置的地图。"
+                }
+              },
+              {
+                sceneId: 3,
+                content: "第三幕：最终的线索集合指向了真正的叛徒。在大家的共同努力下，密令被找回，叛徒被揭露，保障了红军长征的顺利进行。",
+                tips: "整合所有线索，找出唯一合理的解释",
+                question: {
+                  text: "根据剧情发展，谁最有可能是叛徒？",
+                  options: ["新来的通讯员", "受伤的战士", "厨房勤务兵", "老班长"],
+                  correctIndex: 0,
+                  explanation: "新来的通讯员有接触密令的机会，而且背景最难核实。",
+                  clueTitle: "密电本",
+                  clueDescription: "在通讯员的行李中发现的记录了与敌军联络的密电本。"
+                }
+              }
+            ]
+          }
+        };
+        
+        if (response.success) {
+          showProgress(100);
+          fillFormWithData(response.data);
+          showStatus('剧本数据加载成功');
+        } else {
+          showProgress(100);
+          showStatus('加载失败: ' + (response.message || '未知错误'), true);
+        }
+      } catch (error) {
+        console.error('加载剧本数据出错:', error);
+        showProgress(100);
+        showStatus('加载失败，请重试', true);
+      }
+    }
+    
+    // 填充表单数据
+    function fillFormWithData(data) {
+      // 填充基本信息
+      document.getElementById('scriptId').value = data._id || '';
+      document.getElementById('title').value = data.title || '';
+      document.getElementById('description').value = data.description || '';
+      document.getElementById('category').value = data.category || '历史推理';
+      document.getElementById('historical_background').value = data.historical_background || '';
+      
+      if (data.image) {
+        document.getElementById('coverPreview').src = data.image;
+        document.getElementById('coverImageUrl').value = data.image;
+      }
+      
+      // 清空现有角色和场景
+      document.getElementById('charactersContainer').innerHTML = '';
+      document.getElementById('scenesContainer').innerHTML = '';
+      
+      // 填充角色信息
+      if (data.characters && data.characters.length) {
+        data.characters.forEach(char => addCharacter(char));
+      } else {
+        addCharacter(); // 添加一个空角色
+      }
+      
+      // 填充场景信息
+      if (data.scenes && data.scenes.length) {
+        data.scenes.forEach(scene => addScene(scene));
+      } else {
+        addScene(); // 添加一个空场景
+      }
+      
+      // 更新页面标题
+      document.getElementById('pageTitle').textContent = data._id ? '编辑剧本' : '添加新剧本';
+    }
+    
+    // 保存剧本
+    async function saveScript(e) {
+      e.preventDefault();
+      
+      // 验证表单
+      const form = document.getElementById('scriptForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // 收集表单数据
+      const data = collectFormData();
+      const scriptId = document.getElementById('scriptId').value;
+      const isNew = !scriptId;
+      
+      // 显示保存中状态
+      showStatus('正在保存剧本...');
+      showProgress(30);
+      
+      try {
+        // 这里应该调用云函数保存剧本
+        // 为了演示，我们使用延时模拟API调用
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        showProgress(70);
+        
+        // 模拟API响应
+        const response = {
+          success: true,
+          scriptId: scriptId || 'new_id_123'
+        };
+        
+        if (response.success) {
+          showProgress(100);
+          showStatus(isNew ? '剧本创建成功！' : '剧本更新成功！');
+          
+          // 保存成功后，延时返回列表页面
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          showProgress(100);
+          showStatus('保存失败: ' + (response.message || '未知错误'), true);
+        }
+      } catch (error) {
+        console.error('保存剧本出错:', error);
+        showProgress(100);
+        showStatus('保存失败，请重试', true);
+      }
+    }
+    
+    // 初始化页面
+    window.onload = async function() {
+      if (!checkLogin()) return;
+      
+      // 解析URL参数，检查是否是编辑模式
+      const urlParams = new URLSearchParams(window.location.search);
+      const scriptId = urlParams.get('id');
+      
+      // 如果有ID参数，加载剧本数据
+      if (scriptId) {
+        await loadScriptData(scriptId);
+      } else {
+        // 新建剧本，添加默认的空角色和场景
+        addCharacter();
+        addScene();
+      }
+      
+      // 绑定事件处理程序
+      document.getElementById('backButton').addEventListener('click', () => {
+        window.location.href = 'dashboard.html';
+      });
+      
+      document.getElementById('coverUploadBtn').addEventListener('click', uploadCoverImage);
+      
+      document.getElementById('addCharacterBtn').addEventListener('click', () => {
+        addCharacter();
+      });
+      
+      document.getElementById('addSceneBtn').addEventListener('click', () => {
+        addScene();
+      });
+      
+      document.getElementById('cancelBtn').addEventListener('click', () => {
+        if (confirm('确定要取消编辑吗？所有未保存的更改将丢失。')) {
+          window.location.href = 'dashboard.html';
+        }
+      });
+      
+      document.getElementById('scriptForm').addEventListener('submit', saveScript);
+    };
+  </script>
+</body>
+</html>
