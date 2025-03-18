@@ -3,69 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>红色剧本杀 - 管理后台</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>红色剧本杀 - 管理系统</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background-color: #f7f7f7;
+      background-image: linear-gradient(to bottom right, #ffebeb, #fff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      width: 360px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .login-header {
+      background-color: #e60000;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .login-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: normal;
+    }
+    .login-form {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-size: 14px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      border-color: #e60000;
+      outline: none;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #e60000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .login-btn:hover {
+      background-color: #c50000;
+    }
+    .message {
+      text-align: center;
+      padding: 10px;
+      color: #e60000;
+      font-size: 14px;
+      min-height: 20px;
+    }
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #e60000;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      color: #999;
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="login-box">
+    <div class="login-header">
       <h1>红色剧本杀管理系统</h1>
-      <div class="login-form">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input type="text" id="username" placeholder="请输入管理员用户名">
-        </div>
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input type="password" id="password" placeholder="请输入密码">
-        </div>
-        <div class="form-group">
-          <button id="loginBtn" class="btn btn-primary">登录</button>
-        </div>
-        <div id="loginMessage" class="message"></div>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" placeholder="请输入管理员用户名">
       </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" placeholder="请输入密码">
+      </div>
+      <button class="login-btn" id="loginBtn">登录</button>
+      <div class="message" id="message"></div>
+      <div class="loading-spinner" id="spinner"></div>
+    </div>
+    <div class="footer">
+      红色剧本杀小程序管理系统 &copy; 2023
     </div>
   </div>
 
-  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="js/config.js"></script>
   <script>
-    document.getElementById('loginBtn').addEventListener('click', async function() {
-      const username = document.getElementById('username').value;
+    document.getElementById('loginBtn').addEventListener('click', function() {
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
+      const message = document.getElementById('message');
+      const spinner = document.getElementById('spinner');
       
+      // 验证输入
       if (!username || !password) {
-        document.getElementById('loginMessage').textContent = '请输入用户名和密码';
+        message.textContent = '请输入用户名和密码';
         return;
       }
       
-      document.getElementById('loginMessage').textContent = '登录中...';
+      // 显示加载状态
+      message.textContent = '';
+      spinner.style.display = 'block';
+      loginBtn.disabled = true;
       
-      try {
-        const res = await wx.cloud.callFunction({
-          name: 'adminLogin',
-          data: { username, password }
-        });
-        
-        if (res.result.success) {
-          localStorage.setItem('adminToken', res.result.token);
-          localStorage.setItem('userId', res.result.userId);
-          window.location.href = 'dashboard.html';
+      // 模拟登录请求
+      setTimeout(function() {
+        // 简化的验证，实际应该连接到云函数或后端API
+        if (username === 'admin' && password === 'admin123') {
+          // 登录成功：保存会话状态和登录时间
+          const loginTime = new Date().getTime();
+          const sessionData = {
+            username: username,
+            loginTime: loginTime,
+            // 简单的会话令牌，实际应该由服务器生成
+            token: btoa(username + ':' + loginTime) 
+          };
+          
+          localStorage.setItem('adminSession', JSON.stringify(sessionData));
+          message.textContent = '登录成功，正在跳转...';
+          message.style.color = 'green';
+          
+          // 跳转到管理面板
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
         } else {
-          document.getElementById('loginMessage').textContent = res.result.message;
+          // 登录失败
+          message.textContent = '用户名或密码错误';
+          message.style.color = '#e60000';
+          spinner.style.display = 'none';
+          loginBtn.disabled = false;
         }
-      } catch (err) {
-        document.getElementById('loginMessage').textContent = '登录失败，请重试';
-        console.error(err);
+      }, 1000);
+    });
+    
+    // 回车键登录
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('loginBtn').click();
       }
     });
     
-    // 初始化微信云开发
+    // 检查是否已登录
     window.onload = function() {
-      wx.cloud.init({
-        env: config.env,
-        traceUser: true,
-      });
+      const sessionData = localStorage.getItem('adminSession');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          const currentTime = new Date().getTime();
+          // 检查会话是否在24小时内
+          if (currentTime - session.loginTime < 24 * 60 * 60 * 1000) {
+            window.location.href = 'dashboard.html';
+          } else {
+            // 会话过期，清除
+            localStorage.removeItem('adminSession');
+          }
+        } catch (e) {
+          localStorage.removeItem('adminSession');
+        }
+      }
     };
   </script>
 </body>
