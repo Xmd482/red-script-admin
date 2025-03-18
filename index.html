@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>红色剧本杀 - 管理后台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>红色剧本杀管理系统</h1>
+      <div class="login-form">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" placeholder="请输入管理员用户名">
+        </div>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" placeholder="请输入密码">
+        </div>
+        <div class="form-group">
+          <button id="loginBtn" class="btn btn-primary">登录</button>
+        </div>
+        <div id="loginMessage" class="message"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', async function() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        document.getElementById('loginMessage').textContent = '请输入用户名和密码';
+        return;
+      }
+      
+      document.getElementById('loginMessage').textContent = '登录中...';
+      
+      try {
+        const res = await wx.cloud.callFunction({
+          name: 'adminLogin',
+          data: { username, password }
+        });
+        
+        if (res.result.success) {
+          localStorage.setItem('adminToken', res.result.token);
+          localStorage.setItem('userId', res.result.userId);
+          window.location.href = 'dashboard.html';
+        } else {
+          document.getElementById('loginMessage').textContent = res.result.message;
+        }
+      } catch (err) {
+        document.getElementById('loginMessage').textContent = '登录失败，请重试';
+        console.error(err);
+      }
+    });
+    
+    // 初始化微信云开发
+    window.onload = function() {
+      wx.cloud.init({
+        env: config.env,
+        traceUser: true,
+      });
+    };
+  </script>
+</body>
+</html>
