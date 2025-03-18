@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>红色剧本杀 - 管理面板</title>
+  <style>
+    :root {
+      --primary-color: #e60000;
+      --primary-dark: #c50000;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background-color: #f7f7f7;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 220px;
+      background-color: #202020;
+      color: white;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 15px;
+      background-color: var(--primary-color);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+    .user-info {
+      padding: 15px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+      text-align: center;
+    }
+    .sidebar-menu {
+      padding: 15px 0;
+    }
+    .menu-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .menu-item:hover, .menu-item.active {
+      background-color: #333;
+    }
+    .menu-item i {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .page-title {
+      font-size: 24px;
+      color: var(--primary-color);
+    }
+    .button {
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: var(--primary-dark);
+    }
+    .button.secondary {
+      background-color: #f0f0f0;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .button.secondary:hover {
+      background-color: #e0e0e0;
+    }
+    .scripts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .script-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .script-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .script-image {
+      height: 160px;
+      overflow: hidden;
+      position: relative;
+    }
+    .script-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .script-card:hover .script-image img {
+      transform: scale(1.05);
+    }
+    .script-category {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .script-content {
+      padding: 15px;
+    }
+    .script-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .script-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+      line-height: 1.5;
+      height: 42px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+    .script-description:after {
+      content: '...';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background: white;
+      padding-left: 4px;
+    }
+    .script-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #999;
+    }
+    .script-actions {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+    }
+    .action-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+    .action-btn i {
+      margin-right: 5px;
+    }
+    .action-btn.edit {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    .action-btn.edit:hover {
+      background-color: #e0e0e0;
+    }
+    .action-btn.delete {
+      background-color: #ffebeb;
+      color: #e60000;
+    }
+    .action-btn.delete:hover {
+      background-color: #ffd7d7;
+    }
+    .action-btn.preview {
+      background-color: #f0f7ff;
+      color: #0066cc;
+    }
+    .action-btn.preview:hover {
+      background-color: #e0f0ff;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .empty-icon {
+      font-size: 60px;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+    .empty-text {
+      color: #999;
+      margin-bottom: 20px;
+    }
+    .search-bar {
+      margin-bottom: 20px;
+      display: flex;
+    }
+    .search-input {
+      flex-grow: 1;
+      padding: 10px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px 0 0 4px;
+      font-size: 14px;
+    }
+    .search-btn {
+      padding: 10px 15px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .page-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .page-btn:hover {
+      background-color: #f0f0f0;
+    }
+    .page-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    /* 添加图标字体 */
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/materialicons/v139/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+    }
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .stats-section, .settings-section {
+      display: none;
+    }
+    .ellipsis {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      line-height: 1.5;
+      height: 3em; /* 2行文本的高度 */
+    }
+    .ellipsis:after {
+      content: '...';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background: white;
+      padding-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>红色剧本杀管理系统</h1>
+      </div>
+      <div class="user-info">
+        <div id="username">管理员</div>
+        <div>上次登录: <span id="lastLogin">今天</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-item active" data-section="scripts-section">
+          <i class="material-icons">book</i> 剧本管理
+        </div>
+        <div class="menu-item" data-section="stats-section">
+          <i class="material-icons">bar_chart</i> 数据统计
+        </div>
+        <div class="menu-item" data-section="settings-section">
+          <i class="material-icons">settings</i> 系统设置
+        </div>
+        <div class="menu-item" id="logoutBtn">
+          <i class="material-icons">exit_to_app</i> 退出系统
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- 剧本管理区域 -->
+      <div class="scripts-section">
+        <div class="header">
+          <h2 class="page-title">剧本管理</h2>
+          <button class="button" id="addScriptBtn">
+            <i class="material-icons" style="font-size: 16px; margin-right: 5px;">add</i> 添加剧本
+          </button>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="搜索剧本..." id="searchInput">
+          <button class="search-btn" id="searchBtn">
+            <i class="material-icons" style="font-size: 18px;">search</i>
+          </button>
+        </div>
+
+        <div id="scriptsContainer">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在加载剧本列表...</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+          <!-- 分页控件会动态生成 -->
+        </div>
+      </div>
+
+      <!-- 数据统计区域 -->
+      <div class="stats-section">
+        <div class="header">
+          <h2 class="page-title">数据统计</h2>
+        </div>
+        <div class="content-placeholder">
+          <h3>数据统计功能正在开发中...</h3>
+          <p>此功能将在下一版本中推出，敬请期待！</p>
+        </div>
+      </div>
+
+      <!-- 系统设置区域 -->
+      <div class="settings-section">
+        <div class="header">
+          <h2 class="page-title">系统设置</h2>
+        </div>
+        <div class="content-placeholder">
+          <h3>系统设置功能正在开发中...</h3>
+          <p>此功能将在下一版本中推出，敬请期待！</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 登录状态检查
+    function checkLogin() {
+      const sessionData = localStorage.getItem('adminSession');
+      if (!sessionData) {
+        window.location.href = 'index.html';
+        return false;
+      }
+      
+      try {
+        const session = JSON.parse(sessionData);
+        const currentTime = new Date().getTime();
+        
+        // 检查会话是否在24小时内
+        if (currentTime - session.loginTime > 24 * 60 * 60 * 1000) {
+          localStorage.removeItem('adminSession');
+          window.location.href = 'index.html';
+          return false;
+        }
+        
+        // 显示用户名和登录时间
+        document.getElementById('username').textContent = session.username;
+        document.getElementById('lastLogin').textContent = formatDate(session.loginTime);
+        
+        return true;
+      } catch (e) {
+        localStorage.removeItem('adminSession');
+        window.location.href = 'index.html';
+        return false;
+      }
+    }
+    
+    // 格式化日期
+    function formatDate(timestamp) {
+      const date = new Date(timestamp);
+      const today = new Date();
+      
+      if (date.toDateString() === today.toDateString()) {
+        return '今天 ' + date.getHours().toString().padStart(2, '0') + ':' + 
+               date.getMinutes().toString().padStart(2, '0');
+      } else {
+        return date.getFullYear() + '-' + 
+               (date.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+               date.getDate().toString().padStart(2, '0');
+      }
+    }
+    
+    // 退出登录
+    function logout() {
+      if (confirm('确定要退出系统吗？')) {
+        localStorage.removeItem('adminSession');
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // 模拟加载剧本数据
+    function loadScripts(page = 1, search = '') {
+      const scriptsContainer = document.getElementById('scriptsContainer');
+      
+      // 显示加载状态
+      scriptsContainer.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <div>正在加载剧本列表...</div>
+        </div>
+      `;
+      
+      // 模拟API请求延迟
+      setTimeout(() => {
+        // 模拟数据
+        let scripts = [
+          {
+            id: '1',
+            title: '长征密令',
+            description: '红军长征途中的一封关键密令突然失踪，大家必须在天亮前找到密令和叛徒。',
+            category: '历史推理',
+            image: 'https://via.placeholder.com/300x160?text=长征密令',
+            createTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
+            scenes: 3
+          },
+          {
+            id: '2',
+            title: '井冈山的秘密',
+            description: '井冈山革命根据地正处于敌人的重重包围中。近期队伍中出现了一些异常情况，有人怀疑有敌特潜入。',
+            category: '革命故事',
+            image: 'https://via.placeholder.com/300x160?text=井冈山的秘密',
+            createTime: Date.now() - 3 * 24 * 60 * 60 * 1000,
+            scenes: 3
+          },
+          {
+            id: '3',
+            title: '渡江战役',
+            description: '1949年4月，解放军准备渡江作战。玩家扮演的特工小组接到任务，需要获取敌军的防御部署图。',
+            category: '战争策略',
+            image: 'https://via.placeholder.com/300x160?text=渡江战役',
+            createTime: Date.now() - 1 * 24 * 60 * 60 * 1000,
+            scenes: 3
+          }
+        ];
+        
+        // 如果有搜索条件，过滤结果
+        if (search) {
+          const searchLower = search.toLowerCase();
+          scripts = scripts.filter(script => 
+            script.title.toLowerCase().includes(searchLower) || 
+            script.description.toLowerCase().includes(searchLower)
+          );
+        }
+        
+        // 模拟分页
+        const itemsPerPage = 6;
+        const totalPages = Math.ceil(scripts.length / itemsPerPage);
+        const startIndex = (page - 1) * itemsPerPage;
+        const paginatedScripts = scripts.slice(startIndex, startIndex + itemsPerPage);
+        
+        // 检查是否有结果
+        if (scripts.length === 0) {
+          scriptsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📚</div>
+              <div class="empty-text">暂无剧本数据</div>
+              <button class="button" id="createFirstScriptBtn">创建第一个剧本</button>
+            </div>
+          `;
+          
+          document.getElementById('createFirstScriptBtn').addEventListener('click', () => {
+            window.location.href = 'edit-script.html';
+          });
+          
+          // 重置分页
+          document.getElementById('pagination').innerHTML = '';
+          return;
+        }
+        
+        // 渲染剧本列表
+        let html = '<div class="scripts-grid">';
+        
+        paginatedScripts.forEach(script => {
+          html += `
+            <div class="script-card">
+              <div class="script-image">
+                <img src="${script.image}" alt="${script.title}">
+                <div class="script-category">${script.category}</div>
+              </div>
+              <div class="script-content">
+                <h3 class="script-title">${script.title}</h3>
+                <div class="script-description">${script.description}</div>
+                <div class="script-meta">
+                  <span>场景数: ${script.scenes}</span>
+                  <span>创建时间: ${formatDate(script.createTime)}</span>
+                </div>
+                <div class="script-actions">
+                  <button class="action-btn edit" onclick="editScript('${script.id}')">
+                    <i class="material-icons">edit</i> 编辑
+                  </button>
+                  <button class="action-btn preview" onclick="previewScript('${script.id}')">
+                    <i class="material-icons">visibility</i> 预览
+                  </button>
+                  <button class="action-btn delete" onclick="deleteScript('${script.id}')">
+                    <i class="material-icons">delete</i> 删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        scriptsContainer.innerHTML = html;
+        
+        // 渲染分页
+        if (totalPages > 1) {
+          let paginationHtml = '';
+          
+          for (let i = 1; i <= totalPages; i++) {
+            paginationHtml += `
+              <div class="page-btn ${i === page ? 'active' : ''}" onclick="loadScripts(${i}, '${search}')">
+                ${i}
+              </div>
+            `;
+          }
+          
+          document.getElementById('pagination').innerHTML = paginationHtml;
+        } else {
+          document.getElementById('pagination').innerHTML = '';
+        }
+      }, 1000);
+    }
+    
+    // 搜索剧本
+    function searchScripts() {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      loadScripts(1, searchTerm);
+    }
+    
+    // 编辑剧本
+    function editScript(id) {
+      window.location.href = `edit-script.html?id=${id}`;
+    }
+    
+    // 预览剧本
+    function previewScript(id) {
+      alert(`暂未实现预览功能，剧本ID: ${id}`);
+      // 实际应连接到小程序剧本页面
+    }
+    
+    // 删除剧本
+    function deleteScript(id) {
+      if (confirm('确定要删除这个剧本吗？此操作不可恢复！')) {
+        alert(`暂未实现删除功能，剧本ID: ${id}`);
+        // 实际应调用删除API
+        loadScripts(); // 重新加载列表
+      }
+    }
+    
+    // 切换页面区域
+    function switchSection(sectionName) {
+      // 隐藏所有区域
+      document.querySelector('.scripts-section').style.display = 'none';
+      document.querySelector('.stats-section').style.display = 'none';
+      document.querySelector('.settings-section').style.display = 'none';
+      
+      // 显示选中的区域
+      document.querySelector('.' + sectionName).style.display = 'block';
+      
+      // 更新菜单选中状态
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    }
+    
+    // 初始化页面
+    window.onload = function() {
+      if (!checkLogin()) return;
+      
+      // 加载剧本列表
+      loadScripts();
+      
+      // 绑定事件
+      document.getElementById('addScriptBtn').addEventListener('click', () => {
+        window.location.href = 'edit-script.html';
+      });
+      
+      document.getElementById('searchBtn').addEventListener('click', searchScripts);
+      
+      document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          searchScripts();
+        }
+      });
+      
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      
+      // 菜单切换
+      document.querySelectorAll('.menu-item').forEach(item => {
+        if (item.id !== 'logoutBtn') {
+          item.addEventListener('click', () => {
+            const section = item.getAttribute('data-section');
+            switchSection(section);
+          });
+        }
+      });
+      
+      // 初始显示剧本管理区域
+      switchSection('scripts-section');
+    };
+  </script>
+</body>
+</html>
